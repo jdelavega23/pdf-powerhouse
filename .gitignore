@@ -1,0 +1,39 @@
+## Build Results (.NET)
+[Bb]in/
+[Oo]bj/
+dist/
+publish/
+*.zip
+
+## Visual Studio / Code / JetBrains
+.vs/
+.vscode/
+.idea/
+*.user
+*.userosscache
+*.sln.docstates
+*.suo
+TestResults/
+*.log
+
+## Scratch & Temp
+scratch/
+*.tmp
+*.bak
+
+## Hotfolders runtime files (preserve folder structure)
+hotfolders/input/*
+!hotfolders/input/.gitkeep
+hotfolders/processed/*
+!hotfolders/processed/.gitkeep
+hotfolders/failed/*
+!hotfolders/failed/.gitkeep
+
+## Tesseract runtime models (auto-downloaded)
+tessdata/
+*.traineddata
+
+## OS Files
+.DS_Store
+Thumbs.db
+desktop.ini

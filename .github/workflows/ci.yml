@@ -1,0 +1,29 @@
+name: Continuous Integration
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  build-and-test:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET 9
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '9.0.x'
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build Solution
+      run: dotnet build --configuration Release --no-restore
+
+    - name: Run Unit Tests
+      run: dotnet test tests/PdfEngine.Tests/PdfEngine.Tests.csproj --configuration Release --no-build --verbosity normal

@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/PdfEngine.Api/PdfEngine.Api.csproj" />
+    <Project Path="src/PdfEngine.Core/PdfEngine.Core.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/PdfEngine.Tests/PdfEngine.Tests.csproj" />
+  </Folder>
+</Solution>
