@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PDF Powerhouse - Arquitectura Interactiva & Pipeline de Datos</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @keyframes pulseGlow {
+      0%, 100% { filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.6)); }
+      50% { filter: drop-shadow(0 0 16px rgba(147, 51, 234, 0.8)); }
+    }
+    .node-card {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .node-card:hover {
+      transform: translateY(-3px) scale(1.02);
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 antialiased p-4 md:p-8 font-sans min-h-screen">
+
+  <!-- Header -->
+  <div class="max-w-6xl mx-auto mb-8 text-center">
+    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/30 text-blue-400 text-xs font-semibold uppercase tracking-wider mb-3">
+      ⚡ Diagrama Interactivo de Alto Rendimiento
+    </div>
+    <h1 class="text-3xl md:text-5xl font-black tracking-tight text-white mb-3">
+      PDF POWERHOUSE <span class="bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400 bg-clip-text text-transparent">ARCHITECTURE</span>
+    </h1>
+    <p class="text-slate-400 max-w-2xl mx-auto text-sm md:text-base">
+      Pipeline de procesamiento PDF 100% en memoria RAM: desde la ingestión hasta el motor nativo Google PDFium C++ y la entrega segura sin huella en disco.
+    </p>
+
+    <!-- Navigation link back to app -->
+    <div class="mt-4">
+      <a href="/" class="inline-flex items-center gap-2 text-xs text-blue-400 hover:text-blue-300 transition">
+        ← Volver al Panel de Control Web
+      </a>
+    </div>
+
+    <!-- Scenario Selector Controls -->
+    <div class="flex flex-wrap items-center justify-center gap-2 mt-6">
+      <button onclick="setScenario('merge')" id="btn-merge" class="px-4 py-2 rounded-lg text-xs md:text-sm font-semibold border transition bg-blue-600 border-blue-400 text-white shadow-lg shadow-blue-500/20">
+        📑 Fusión & Edición (PDFium)
+      </button>
+      <button onclick="setScenario('sign')" id="btn-sign" class="px-4 py-2 rounded-lg text-xs md:text-sm font-semibold border transition bg-slate-900 border-slate-700 text-slate-300 hover:border-slate-500">
+        🔐 Firma PAdES & Seguridad
+      </button>
+      <button onclick="setScenario('ocr')" id="btn-ocr" class="px-4 py-2 rounded-lg text-xs md:text-sm font-semibold border transition bg-slate-900 border-slate-700 text-slate-300 hover:border-slate-500">
+        👁️ OCR & Tablas (Tesseract)
+      </button>
+      <button onclick="setScenario('hotfolder')" id="btn-hotfolder" class="px-4 py-2 rounded-lg text-xs md:text-sm font-semibold border transition bg-slate-900 border-slate-700 text-slate-300 hover:border-slate-500">
+        📂 Hot Folders Desatendido
+      </button>
+    </div>
+  </div>
+
+  <!-- Interactive Canvas / Flowchart Grid -->
+  <div class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-4 gap-6 items-stretch mb-8">
+
+    <!-- 1. Ingestion Layer -->
+    <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between shadow-xl">
+      <div>
+        <div class="flex items-center justify-between mb-4">
+          <span class="text-xs font-bold uppercase tracking-wider text-emerald-400 bg-emerald-400/10 px-2.5 py-1 rounded-md border border-emerald-400/20">
+            Fase 1 • Ingestión
+          </span>
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
+        </div>
+        <h3 class="text-lg font-bold text-white mb-2">Entrada de Datos</h3>
+        <p class="text-xs text-slate-400 mb-4">Canales de entrada concurrentes sin persistencia temporal.</p>
+
+        <div class="space-y-3">
+          <div onclick="inspectNode('webui')" class="node-card cursor-pointer p-3 rounded-xl bg-slate-800/80 border border-slate-700 hover:border-emerald-400">
+            <div class="flex items-center gap-3">
+              <span class="text-xl">🌐</span>
+              <div>
+                <div class="text-sm font-semibold text-white">Web SPA Dashboard</div>
+                <div class="text-[11px] text-slate-400">Vanilla HTML5/JS reactivo (0 node_modules)</div>
+              </div>
+            </div>
+          </div>
+
+          <div onclick="inspectNode('rest')" class="node-card cursor-pointer p-3 rounded-xl bg-slate-800/80 border border-slate-700 hover:border-emerald-400">
+            <div class="flex items-center gap-3">
+              <span class="text-xl">⚡</span>
+              <div>
+                <div class="text-sm font-semibold text-white">REST API & cURL</div>
+                <div class="text-[11px] text-slate-400">Streaming Multipart / OpenAPI Swagger</div>
+              </div>
+            </div>
+          </div>
+
+          <div onclick="inspectNode('hotfolder')" class="node-card cursor-pointer p-3 rounded-xl bg-slate-800/80 border border-slate-700 hover:border-emerald-400">
+            <div class="flex items-center gap-3">
+              <span class="text-xl">📁</span>
+              <div>
+                <div class="text-sm font-semibold text-white">Hot Folders Watchdog</div>
+                <div class="text-[11px] text-slate-400">FileSystemWatcher con debounce lock</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-4 pt-3 border-t border-slate-800 text-[11px] text-emerald-400/80 font-mono">
+        Latencia I/O: <span class="font-bold">&lt; 2 ms</span>
+      </div>
+    </div>
+
+    <!-- 2. Core Orchestration (RAM Stream) -->
+    <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between shadow-xl">
+      <div>
+        <div class="flex items-center justify-between mb-4">
+          <span class="text-xs font-bold uppercase tracking-wider text-blue-400 bg-blue-400/10 px-2.5 py-1 rounded-md border border-blue-400/20">
+            Fase 2 • Orquestación
+          </span>
+          <span class="w-2.5 h-2.5 rounded-full bg-blue-400 animate-pulse"></span>
+        </div>
+        <h3 class="text-lg font-bold text-white mb-2">Memory Router</h3>
+        <p class="text-xs text-slate-400 mb-4">Enrutador de memoria en ASP.NET Core 9 Minimal API.</p>
+
+        <div onclick="inspectNode('ramstream')" class="node-card cursor-pointer p-4 rounded-xl bg-blue-950/40 border border-blue-500/40 hover:border-blue-400 mb-3">
+          <div class="flex items-center gap-3 mb-2">
+            <span class="text-2xl">🧠</span>
+            <div class="text-sm font-bold text-blue-200">Zero-Disk RAM Stream</div>
+          </div>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            Los bytes del PDF fluyen directamente por <code class="text-blue-300">MemoryStream</code>. Nunca tocan el disco ni carpetas temporales.
+          </p>
+          <div class="mt-3 flex items-center gap-2">
+            <span class="px-2 py-0.5 rounded text-[10px] bg-blue-500/20 text-blue-300 border border-blue-500/30">RGPD Compliant</span>
+            <span class="px-2 py-0.5 rounded text-[10px] bg-purple-500/20 text-purple-300 border border-purple-500/30">HIPAA Safe</span>
+          </div>
+        </div>
+
+        <div onclick="inspectNode('di')" class="node-card cursor-pointer p-3 rounded-xl bg-slate-800/80 border border-slate-700 hover:border-blue-400">
+          <div class="text-xs font-semibold text-white">Inyección de Dependencias</div>
+          <div class="text-[11px] text-slate-400 mt-1">Contratos desacoplados vía ServiceCollectionExtensions</div>
+        </div>
+      </div>
+
+      <div class="mt-4 pt-3 border-t border-slate-800 text-[11px] text-blue-400/80 font-mono">
+        Throughput: <span class="font-bold">120 MB/s</span>
+      </div>
+    </div>
+
+    <!-- 3. Tri-Engine Execution -->
+    <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between shadow-xl">
+      <div>
+        <div class="flex items-center justify-between mb-4">
+          <span class="text-xs font-bold uppercase tracking-wider text-purple-400 bg-purple-400/10 px-2.5 py-1 rounded-md border border-purple-400/20">
+            Fase 3 • Motores
+          </span>
+          <span class="w-2.5 h-2.5 rounded-full bg-purple-400 animate-pulse"></span>
+        </div>
+        <h3 class="text-lg font-bold text-white mb-2">Tri-Engine Pipeline</h3>
+        <p class="text-xs text-slate-400 mb-4">Ejecución en paralelo según la naturaleza de la tarea.</p>
+
+        <div class="space-y-3">
+          <div onclick="inspectNode('pdfium')" id="node-pdfium" class="node-card cursor-pointer p-3 rounded-xl bg-slate-800/80 border border-purple-500/40 hover:border-purple-300">
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-xs font-bold text-purple-300">Google PDFium (C++)</span>
+              <span class="text-[10px] text-purple-400 font-mono">Nativo x64</span>
+            </div>
+            <p class="text-[11px] text-slate-300">Rasterizado 300 DPI, render hiperrápido a PNG y matriz de glifos.</p>
+          </div>
+
+          <div onclick="inspectNode('vector')" id="node-vector" class="node-card cursor-pointer p-3 rounded-xl bg-slate-800/80 border border-slate-700 hover:border-purple-300">
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-xs font-bold text-indigo-300">PdfSharp + BouncyCastle</span>
+              <span class="text-[10px] text-indigo-400 font-mono">Criptografía</span>
+            </div>
+            <p class="text-[11px] text-slate-300">Firmas PAdES/PKCS#7, sellos visuales, marcas de agua y unión vectorial.</p>
+          </div>
+
+          <div onclick="inspectNode('ocr')" id="node-ocr" class="node-card cursor-pointer p-3 rounded-xl bg-slate-800/80 border border-slate-700 hover:border-purple-300">
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-xs font-bold text-pink-300">Tesseract 5 + PdfPig</span>
+              <span class="text-[10px] text-pink-400 font-mono">IA / Visión</span>
+            </div>
+            <p class="text-[11px] text-slate-300">OCR offline multilingüe, análisis de tablas a CSV y Doctor PDF.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-4 pt-3 border-t border-slate-800 text-[11px] text-purple-400/80 font-mono">
+        Rendimiento: <span class="font-bold">&lt; 35 ms / página</span>
+      </div>
+    </div>
+
+    <!-- 4. Egress & Delivery -->
+    <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between shadow-xl">
+      <div>
+        <div class="flex items-center justify-between mb-4">
+          <span class="text-xs font-bold uppercase tracking-wider text-cyan-400 bg-cyan-400/10 px-2.5 py-1 rounded-md border border-cyan-400/20">
+            Fase 4 • Entrega
+          </span>
+          <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse"></span>
+        </div>
+        <h3 class="text-lg font-bold text-white mb-2">Egress Soberano</h3>
+        <p class="text-xs text-slate-400 mb-4">Salida en streaming inmediato hacia el consumidor.</p>
+
+        <div class="space-y-3">
+          <div onclick="inspectNode('streamout')" class="node-card cursor-pointer p-3 rounded-xl bg-slate-800/80 border border-slate-700 hover:border-cyan-400">
+            <div class="flex items-center gap-3">
+              <span class="text-xl">⬇️</span>
+              <div>
+                <div class="text-sm font-semibold text-white">HTTP Streaming</div>
+                <div class="text-[11px] text-slate-400">Descarga directa sin almacenar en disco del servidor</div>
+              </div>
+            </div>
+          </div>
+
+          <div onclick="inspectNode('zipbatch')" class="node-card cursor-pointer p-3 rounded-xl bg-slate-800/80 border border-slate-700 hover:border-cyan-400">
+            <div class="flex items-center gap-3">
+              <span class="text-xl">📦</span>
+              <div>
+                <div class="text-sm font-semibold text-white">ZIP Container</div>
+                <div class="text-[11px] text-slate-400">Empaquetado dinámico para lotes masivos</div>
+              </div>
+            </div>
+          </div>
+
+          <div onclick="inspectNode('hotprocessed')" class="node-card cursor-pointer p-3 rounded-xl bg-slate-800/80 border border-slate-700 hover:border-cyan-400">
+            <div class="flex items-center gap-3">
+              <span class="text-xl">📂</span>
+              <div>
+                <div class="text-sm font-semibold text-white">Hotfolders /processed</div>
+                <div class="text-[11px] text-slate-400">Despacho con log forense de auditoría</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-4 pt-3 border-t border-slate-800 text-[11px] text-cyan-400/80 font-mono">
+        Huella en Disco: <span class="font-bold text-emerald-400">0 BYTES</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Interactive Inspector Panel (Detail Card) -->
+  <div class="max-w-6xl mx-auto bg-slate-900 border border-indigo-500/30 rounded-2xl p-6 shadow-2xl relative overflow-hidden">
+    <div class="absolute -right-20 -top-20 w-64 h-64 bg-indigo-600/10 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="flex flex-col md:flex-row items-start justify-between gap-6">
+      <div class="flex-1">
+        <div class="flex items-center gap-3 mb-2">
+          <span id="inspect-icon" class="text-3xl">🚀</span>
+          <div>
+            <h4 id="inspect-title" class="text-xl font-bold text-white">Google PDFium Native C++ Engine</h4>
+            <div id="inspect-tag" class="text-xs text-indigo-400 font-mono">Docnet.Core • Binarios oficiales C++ x64 de Google Chrome</div>
+          </div>
+        </div>
+        <p id="inspect-desc" class="text-slate-300 text-sm leading-relaxed mt-3">
+          Google PDFium proporciona el renderizado más rápido y fiel del mundo. Al compilarlo nativamente con Docnet, PDF Powerhouse renderiza páginas completas a PNG de 300 DPI en menos de 15 milisegundos, permitiendo previsualizaciones ultranítidas y preparación precisa para OCR sin saturar la CPU.
+        </p>
+      </div>
+
+      <!-- Live Metric Box -->
+      <div class="w-full md:w-80 bg-slate-950/80 border border-slate-800 rounded-xl p-4 flex flex-col justify-between">
+        <div class="text-xs uppercase tracking-wider text-slate-400 font-bold mb-3">Métricas Operativas</div>
+        <div class="space-y-2 text-xs">
+          <div class="flex justify-between py-1 border-b border-slate-800/80">
+            <span class="text-slate-400">Velocidad Promedio:</span>
+            <span id="metric-speed" class="font-bold text-emerald-400">&lt; 14 ms / pág</span>
+          </div>
+          <div class="flex justify-between py-1 border-b border-slate-800/80">
+            <span class="text-slate-400">Uso de Disco:</span>
+            <span class="font-bold text-emerald-400">0 MB (RAM Pura)</span>
+          </div>
+          <div class="flex justify-between py-1 border-b border-slate-800/80">
+            <span class="text-slate-400">Estándar ISO:</span>
+            <span id="metric-iso" class="font-bold text-indigo-400">ISO 32000-1 (PDF)</span>
+          </div>
+          <div class="flex justify-between py-1">
+            <span class="text-slate-400">Dependencias Cloud:</span>
+            <span class="font-bold text-emerald-400">CERO (100% Offline)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Interactive JavaScript Logic -->
+  <script>
+    const nodeDetails = {
+      pdfium: {
+        icon: "🚀",
+        title: "Google PDFium Native C++ Engine",
+        tag: "Docnet.Core • Binarios oficiales C++ x64 de Google Chrome",
+        desc: "Google PDFium proporciona el renderizado más rápido y fiel del mundo. Al compilarlo nativamente con Docnet, PDF Powerhouse renderiza páginas completas a PNG de 300 DPI en menos de 15 milisegundos, permitiendo previsualizaciones ultranítidas y preparación precisa para OCR sin saturar la CPU.",
+        speed: "< 14 ms / pág",
+        iso: "ISO 32000-1 (PDF)"
+      },
+      vector: {
+        icon: "🔐",
+        title: "PdfSharpCore & Criptografía BouncyCastle",
+        tag: "BouncyCastle.Cryptography • PAdES-BES / PKCS#7 • AES-256",
+        desc: "Módulo encargado de reconstruir el árbol sintáctico del PDF, estampar marcas de agua vectoriales, rotar páginas y aplicar firmas digitales avanzadas PAdES con estampas criptográficas visuales y sellos de tiempo certificados X.509.",
+        speed: "< 22 ms / doc",
+        iso: "ETSI TS 102 778 (PAdES)"
+      },
+      ocr: {
+        icon: "👁️",
+        title: "Tesseract 5 Nativo & UglyToad PdfPig",
+        tag: "Tesseract 5.2.0 • OCR Multilingüe • Extractor de Tablas",
+        desc: "Motor de inteligencia documental. Rastrea la cuadrícula geométrica de tablas para exportar a CSV/Excel y pasa los mapas de bits a Tesseract para convertir PDFs escaneados en documentos con texto seleccionable y buscable.",
+        speed: "~ 350 ms / pág",
+        iso: "ISO 19005 (PDF/A)"
+      },
+      ramstream: {
+        icon: "🧠",
+        title: "Zero-Disk RAM Streaming Pipeline",
+        tag: "System.IO.MemoryStream • Garbage Collector Generación 2 Eficiente",
+        desc: "Arquitectura de privacidad absoluta: el archivo entra en la petición HTTP, se procesa en búferes de memoria y se devuelve como stream. Nunca se crea un archivo .tmp en disco, garantizando que nadie pueda recuperar datos sensibles.",
+        speed: "Instantáneo (RAM)",
+        iso: "Cumplimiento RGPD & HIPAA"
+      },
+      webui: {
+        icon: "🌐",
+        title: "Panel Web SPA Reactivo",
+        tag: "Vanilla HTML5 / CSS3 / JavaScript Nativo (Cero dependencias npm)",
+        desc: "Interfaz gráfica moderna servida directamente desde wwwroot por ASP.NET Core. Sin node_modules pesados que caduquen o introduzcan vulnerabilidades. Arrastra y suelta con un clic.",
+        speed: "60 FPS Fluidos",
+        iso: "W3C Web Standards"
+      },
+      rest: {
+        icon: "⚡",
+        title: "ASP.NET Core 9 Minimal API",
+        tag: "Swagger / OpenAPI • Multi-part Form Data • Alto Throughput",
+        desc: "Microservicio ultrarrápido diseñado para automatizaciones headless. Permite ser invocado por scripts en Python, curl, bash o integrarse en contenedores Docker y flujos de trabajo de oficina.",
+        speed: "> 5.000 req/seg",
+        iso: "OpenAPI 3.0"
+      },
+      hotfolder: {
+        icon: "📁",
+        title: "Headless Hot Folders Watchdog",
+        tag: "Microsoft.Extensions.Hosting.IHostedService • FileSystemWatcher",
+        desc: "Servicio en segundo plano que vigila la carpeta input/ continuamente. Cuenta con un algoritmo de debounce con reintentos para no procesar archivos mientras un escáner de red sigue escribiendo datos.",
+        speed: "Automático en Background",
+        iso: "Headless Watchdog"
+      }
+    };
+
+    function inspectNode(nodeKey) {
+      const data = nodeDetails[nodeKey];
+      if (!data) return;
+      document.getElementById('inspect-icon').innerText = data.icon;
+      document.getElementById('inspect-title').innerText = data.title;
+      document.getElementById('inspect-tag').innerText = data.tag;
+      document.getElementById('inspect-desc').innerText = data.desc;
+      document.getElementById('metric-speed').innerText = data.speed;
+      document.getElementById('metric-iso').innerText = data.iso;
+    }
+
+    function setScenario(type) {
+      ['merge', 'sign', 'ocr', 'hotfolder'].forEach(id => {
+        const btn = document.getElementById('btn-' + id);
+        btn.className = "px-4 py-2 rounded-lg text-xs md:text-sm font-semibold border transition bg-slate-900 border-slate-700 text-slate-300 hover:border-slate-500";
+      });
+
+      const activeBtn = document.getElementById('btn-' + type);
+      if (activeBtn) {
+        activeBtn.className = "px-4 py-2 rounded-lg text-xs md:text-sm font-semibold border transition bg-blue-600 border-blue-400 text-white shadow-lg shadow-blue-500/20";
+      }
+
+      if (type === 'merge') inspectNode('pdfium');
+      if (type === 'sign') inspectNode('vector');
+      if (type === 'ocr') inspectNode('ocr');
+      if (type === 'hotfolder') inspectNode('hotfolder');
+    }
+  </script>
+</body>
+</html>

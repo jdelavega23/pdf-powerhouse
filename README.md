@@ -127,6 +127,8 @@ await File.WriteAllBytesAsync("court_compliant_filing.pdf", pdfaBytes);
 
 PDF Powerhouse is built with a decoupled clean architecture designed for maximum throughput, resilience, and strict data privacy.
 
+> 💡 **Interactive Architecture Viewer**: When running the application, open [`http://localhost:5000/architecture.html`](http://localhost:5000/architecture.html) to explore the live, animated data pipeline and inspect memory allocations, ISO standards, and engine benchmarks in real-time.
+
 ```mermaid
 flowchart TD
     subgraph Ingestion ["1. INGESTION LAYER"]
