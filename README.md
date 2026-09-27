@@ -2,6 +2,10 @@
 
 <div align="center">
 
+![PDF Powerhouse Banner](assets/hero-banner.svg)
+
+<br/>
+
 [![Continuous Integration](https://github.com/jdelavega23/pdf-powerhouse/actions/workflows/ci.yml/badge.svg)](https://github.com/jdelavega23/pdf-powerhouse/actions)
 ![.NET 9](https://img.shields.io/badge/.NET-9.0-purple.svg?style=flat-square&logo=dotnet)
 ![Google PDFium](https://img.shields.io/badge/Google-PDFium%20C%2B%2B-red.svg?style=flat-square)
