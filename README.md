@@ -14,7 +14,7 @@
 
 Designed & Engineered by **Juan Manuel de la Vega** ([@jdelavega23](https://github.com/jdelavega23))
 
-[Features](#-key-features) • [Architecture](#-technical-architecture) • [Quickstart](#-quickstart) • [Docker](#-docker--containers) • [Roadmap](#-roadmap) • [Contributing](#-contributing)
+[Download v1.0.0](https://github.com/jdelavega23/pdf-powerhouse/releases/latest) • [Features](#-key-features) • [Why PDF Powerhouse?](#-why-pdf-powerhouse-the-killer-comparison) • [Architecture](#-technical-architecture) • [API Cheat Sheet](#-developer--curl-cheat-sheet) • [Quickstart](#-quickstart) • [Docker](#-docker--containers)
 
 </div>
 
@@ -25,6 +25,22 @@ Designed & Engineered by **Juan Manuel de la Vega** ([@jdelavega23](https://gith
 Tired of abusive subscription fees ($25/mo to Adobe Acrobat or ILovePDF) and uploading sensitive personal, legal, or medical documents to third-party cloud servers?
 
 **PDF Powerhouse** is an open-source, enterprise-grade PDF suite engineered for **absolute local privacy (GDPR / HIPAA compliant)** and blazing speed. All operations are executed directly in RAM using native C++ Google PDFium and .NET 9, leaving zero file traces behind.
+
+---
+
+## 🥊 Why PDF Powerhouse? (The Killer Comparison)
+
+| Capability | 🚀 **PDF Powerhouse** | 🏢 **Adobe Acrobat Pro** | ☁️ **ILovePDF / Smallpdf** |
+| :--- | :---: | :---: | :---: |
+| **Pricing** | 🟢 **$0 (Free & MIT Open Source)** | 🔴 \$239.88 / year | 🔴 \$72.00 / year |
+| **Privacy & Security** | 🟢 **100% In-Memory RAM (Zero Telemetry)** | 🟡 Cloud Sync & Telemetry | 🔴 Uploaded to Cloud Servers |
+| **Core Engine** | ⚡ **Google PDFium C++ (Chrome Engine)** | Heavy Proprietary Native | Slow Web Server Queue |
+| **Digital Signatures** | 🟢 **PKCS#7 / PAdES (X.509 certs + stamps)** | 🟡 Paid Tier | 🔴 Paid / External e-Sign |
+| **Offline OCR** | 🟢 **Local Tesseract 5 (Multi-language)** | 🟡 Desktop only | 🔴 Cloud Processing Only |
+| **PDF/A Judicial Standard** | 🟢 **ISO 19005-1 & 19005-2 built-in** | 🟡 Included | 🔴 Paid feature |
+| **Table Extraction** | 🟢 **Direct export to CSV / Excel** | 🟡 Included | 🔴 Limited free credits |
+| **Unattended Hot Folders** | 🟢 **Headless Watchdog Service** | 🔴 Enterprise License only | ❌ Not available |
+| **REST API / Headless** | 🟢 **Ready for Docker / Homelabs** | 🔴 Expensive Adobe PDF Services API | 🔴 Metered API per credit |
 
 ---
 
@@ -56,7 +72,7 @@ Tired of abusive subscription fees ($25/mo to Adobe Acrobat or ILovePDF) and upl
 
 ```mermaid
 graph TD
-    Client[Web SPA / Desktop / CLI / CURL] -->|HTTP Multipart & Streaming| API[ASP.NET Core 9 Minimal API]
+    Client[Web SPA / Desktop / CLI / cURL / Scripts] -->|HTTP Multipart & Streaming| API[ASP.NET Core 9 Minimal API]
     API --> Core[PdfEngine.Core]
     
     subgraph "PdfEngine.Core Engines"
@@ -82,21 +98,57 @@ Automated test suite using xUnit. 34/34 tests passing with dynamic in-memory PDF
 
 ---
 
+## 💻 Developer & cURL Cheat Sheet
+
+Automate your documents from scripts, bash, Python, or homelab automation:
+
+#### 1. Merge multiple PDFs:
+```bash
+curl -X POST "http://localhost:5000/api/pdf/merge" \
+  -F "files=@document1.pdf" \
+  -F "files=@document2.pdf" \
+  --output merged.pdf
+```
+
+#### 2. Convert to PDF/A (Court & Government Standard):
+```bash
+curl -X POST "http://localhost:5000/api/pdf/pdfa/convert" \
+  -F "file=@invoice.pdf" \
+  -F "standard=PDF_A_2b" \
+  --output compliant_archive.pdf
+```
+
+#### 3. Extract Tables to CSV:
+```bash
+curl -X POST "http://localhost:5000/api/pdf/tables/extract-csv" \
+  -F "file=@financial_report.pdf" \
+  --output report_tables.csv
+```
+
+#### 4. Run Offline OCR:
+```bash
+curl -X POST "http://localhost:5000/api/pdf/ocr" \
+  -F "file=@scanned_receipt.pdf" \
+  -F "languages=spa+eng" \
+  --output searchable.pdf
+```
+
+---
+
 ## 🚀 Quickstart
 
-### 1. Run Automated Tests
-```bash
-dotnet test tests/PdfEngine.Tests/PdfEngine.Tests.csproj
-```
+### Option A: Download Standalone Executable (Windows)
+1. Go to [Releases](https://github.com/jdelavega23/pdf-powerhouse/releases/latest).
+2. Download `PDF_Powerhouse_v1.0.0_win-x64.zip`.
+3. Extract and double-click `Iniciar_PDF_Powerhouse.bat`. Your browser opens instantly at `http://localhost:5000`.
 
-### 2. Start the API & Web Dashboard
+### Option B: Build from Source (.NET 9)
 ```bash
+git clone https://github.com/jdelavega23/pdf-powerhouse.git
+cd pdf-powerhouse
+dotnet test tests/PdfEngine.Tests/PdfEngine.Tests.csproj
 dotnet run --project src/PdfEngine.Api/PdfEngine.Api.csproj
 ```
-
-Open your browser at:
-- **Interactive Web App**: [http://localhost:5000](http://localhost:5000)
-- **Interactive Swagger Documentation**: [http://localhost:5000/swagger](http://localhost:5000/swagger)
 
 ---
 
@@ -108,7 +160,7 @@ Deploy anywhere with a single command:
 docker-compose up -d --build
 ```
 
-Access the service immediately on port `5000`.
+Access the service immediately on port `5000` (Web UI at `/` and Swagger at `/swagger`).
 
 ---
 
@@ -141,5 +193,11 @@ For responsible vulnerability reporting, please see [SECURITY.md](SECURITY.md).
 
 ## 📄 License
 
-This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.  
 Google PDFium, Tesseract, and bundled dependencies retain their respective open-source licenses.
+
+---
+
+<div align="center">
+⭐ <b>Star this repository if you believe in free, private and sovereign software!</b> ⭐
+</div>
