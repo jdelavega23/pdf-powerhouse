@@ -14,7 +14,7 @@
 
 Designed & Engineered by **Juan Manuel de la Vega** ([@jdelavega23](https://github.com/jdelavega23))
 
-[Download v1.0.0](https://github.com/jdelavega23/pdf-powerhouse/releases/latest) • [Quickstart](#-quickstart) • [Usage Examples](#-direct-usage-examples) • [Why PDF Powerhouse?](#-why-pdf-powerhouse-the-killer-comparison) • [Architecture Deep-Dive](#-architecture-deep-dive) • [cURL Cheat Sheet](#-developer--curl-cheat-sheet)
+[Download v1.0.0](https://github.com/jdelavega23/pdf-powerhouse/releases/latest) • [🌐 Live Interactive Architecture](https://jdelavega23.github.io/pdf-powerhouse/) • [Quickstart](#-quickstart) • [Usage Examples](#-direct-usage-examples) • [Why PDF Powerhouse?](#-why-pdf-powerhouse-the-killer-comparison) • [Architecture Deep-Dive](#-architecture-deep-dive) • [cURL Cheat Sheet](#-developer--curl-cheat-sheet)
 
 </div>
 
@@ -127,7 +127,9 @@ await File.WriteAllBytesAsync("court_compliant_filing.pdf", pdfaBytes);
 
 PDF Powerhouse is built with a decoupled clean architecture designed for maximum throughput, resilience, and strict data privacy.
 
-> 💡 **Interactive Architecture Viewer**: When running the application, open [`http://localhost:5000/architecture.html`](http://localhost:5000/architecture.html) to explore the live, animated data pipeline and inspect memory allocations, ISO standards, and engine benchmarks in real-time.
+> 🌐 **Explore the Live Interactive Architecture**:  
+> Open the animated pipeline directly in your browser: **[https://jdelavega23.github.io/pdf-powerhouse/](https://jdelavega23.github.io/pdf-powerhouse/)**  
+> *(Features interactive scenario simulations, live memory inspection, and engine performance benchmarks. When running locally, it is also available at `http://localhost:5000/architecture.html`).*
 
 ```mermaid
 flowchart TD
