@@ -14,7 +14,7 @@
 
 Designed & Engineered by **Juan Manuel de la Vega** ([@jdelavega23](https://github.com/jdelavega23))
 
-[Download v1.0.0](https://github.com/jdelavega23/pdf-powerhouse/releases/latest) • [Features](#-key-features) • [Why PDF Powerhouse?](#-why-pdf-powerhouse-the-killer-comparison) • [Architecture](#-technical-architecture) • [API Cheat Sheet](#-developer--curl-cheat-sheet) • [Quickstart](#-quickstart) • [Docker](#-docker--containers)
+[Download v1.0.0](https://github.com/jdelavega23/pdf-powerhouse/releases/latest) • [Quickstart](#-quickstart) • [Usage Examples](#-direct-usage-examples) • [Why PDF Powerhouse?](#-why-pdf-powerhouse-the-killer-comparison) • [Architecture Deep-Dive](#-architecture-deep-dive) • [cURL Cheat Sheet](#-developer--curl-cheat-sheet)
 
 </div>
 
@@ -25,6 +25,85 @@ Designed & Engineered by **Juan Manuel de la Vega** ([@jdelavega23](https://gith
 Tired of abusive subscription fees ($25/mo to Adobe Acrobat or ILovePDF) and uploading sensitive personal, legal, or medical documents to third-party cloud servers?
 
 **PDF Powerhouse** is an open-source, enterprise-grade PDF suite engineered for **absolute local privacy (GDPR / HIPAA compliant)** and blazing speed. All operations are executed directly in RAM using native C++ Google PDFium and .NET 9, leaving zero file traces behind.
+
+---
+
+## 🚀 Quickstart
+
+Choose your preferred way to run PDF Powerhouse:
+
+### 1. 💻 Desktop User (1-Click Standalone)
+No installation or programming knowledge needed:
+1. Download **[`PDF_Powerhouse_v1.0.0_win-x64.zip`](https://github.com/jdelavega23/pdf-powerhouse/releases/latest)**.
+2. Extract the ZIP to any folder.
+3. Double-click `Iniciar_PDF_Powerhouse.bat`.
+4. Your browser will instantly open at **`http://localhost:5000`** with the full interactive dashboard.
+
+### 2. 🐳 Docker & Homelab (Self-Hosted)
+Deploy with a single command on your Linux server, NAS, or homelab:
+```bash
+docker-compose up -d --build
+```
+* **Interactive Web App**: `http://localhost:5000`
+* **Swagger API Explorer**: `http://localhost:5000/swagger`
+
+### 3. 🛠️ .NET Developer (Build from Source)
+Requires [.NET 9 SDK](https://dotnet.microsoft.com/download/dotnet/9.0):
+```bash
+git clone https://github.com/jdelavega23/pdf-powerhouse.git
+cd pdf-powerhouse
+dotnet test tests/PdfEngine.Tests/PdfEngine.Tests.csproj
+dotnet run --project src/PdfEngine.Api/PdfEngine.Api.csproj
+```
+
+---
+
+## 🎯 Direct Usage Examples
+
+### Example 1: Web Interface (No-Code Workflow)
+1. **Open the Dashboard**: Navigate to `http://localhost:5000`.
+2. **Select Tool**: Click on **Merge**, **Sign**, **PDF/A**, or **OCR** in the left sidebar.
+3. **Drag & Drop**: Drop your PDF files into the upload zone.
+4. **Configure Options**: Adjust settings (e.g., select certification level, watermark opacity, or OCR languages `spa+eng`).
+5. **Instant Result**: The output is streamed immediately from RAM to your browser for instant download.
+
+---
+
+### Example 2: Python Script (Automated Batch Processing)
+You can integrate PDF Powerhouse into existing data pipelines in just 5 lines of Python:
+
+```python
+import requests
+
+# 1. Merge multiple documents via REST API
+url = "http://localhost:5000/api/pdf/merge"
+files = [
+    ("files", open("invoice_page1.pdf", "rb")),
+    ("files", open("invoice_page2.pdf", "rb"))
+]
+
+response = requests.post(url, files=files)
+with open("combined_invoice.pdf", "wb") as f:
+    f.write(response.content)
+
+print("Merged successfully without third-party cloud!")
+```
+
+---
+
+### Example 3: C# Service Integration (.NET)
+```csharp
+using var httpClient = new HttpClient();
+using var form = new MultipartFormDataContent();
+
+var fileStream = File.OpenRead("legal_filing.pdf");
+form.Add(new StreamContent(fileStream), "file", "legal_filing.pdf");
+form.Add(new StringContent("PDF_A_2b"), "standard");
+
+var response = await httpClient.PostAsync("http://localhost:5000/api/pdf/pdfa/convert", form);
+var pdfaBytes = await response.Content.ReadAsByteArrayAsync();
+await File.WriteAllBytesAsync("court_compliant_filing.pdf", pdfaBytes);
+```
 
 ---
 
@@ -44,57 +123,69 @@ Tired of abusive subscription fees ($25/mo to Adobe Acrobat or ILovePDF) and upl
 
 ---
 
-## ✨ Key Features
+## 🧱 Architecture Deep-Dive
 
-- **Blazing Native Rendering**: Official **Google PDFium C++** (x64) bindings render pages to PNG in milliseconds with ultra-crisp resolution.
-- **Document Manipulation**:
-  - `Merge`: Ultra-fast PDF concatenation preserving vector graphics, bookmarks, and fonts.
-  - `Split`: Automatic splitting into single pages or ranges, with instant `.ZIP` packaging.
-  - `Extract`: Surgical page extraction by custom ranges (e.g. `1-3, 5, 8-10`).
-  - `Rotate`: 90°, 180°, 270° orientation correction (per page or whole document).
-  - `Watermark`: Vector watermark overlay with customizable font, angle, opacity, and color.
-- **Security & Integrity**:
-  - `Protect`: Multi-level password encryption (User / Owner) with granular permission flags (printing, copying, annotations).
-  - `Unlock`: Permission stripping and decryption.
-  - `Sign`: PKCS#7 / PAdES digital signatures with X.509 certificates (`.pfx` / `.p12`), visual cryptographic stamps, and self-signed certificate generator.
-- **Advanced Engineering**:
-  - `PDF/A Validator & Converter`: Official ISO 19005-1 / ISO 19005-2 compliance for judicial and public administration submissions.
-  - `Local OCR`: Native Tesseract 5 engine (300 DPI pre-render + multilingual recognition with automatic model downloads).
-  - `Doctor PDF`: Structural diagnosis and automated repair of corrupted streams.
-  - `Office Converter`: Universal conversion of Office documents (`.docx`, `.xlsx`, `.pptx`, `.csv`, `.txt`, `.rtf`) to vector PDF.
-  - `Table Extractor`: Intelligent table boundary detection with export to structured CSV / Excel.
-  - `Hot Folders`: Background watchdog service for unattended directory processing (`input/` ➔ `processed/` or `failed/`).
-  - `Batch Studio`: Concurrent multi-threaded processing with ZIP packaging and forensic audit reports.
-
----
-
-## 🧱 Technical Architecture
+PDF Powerhouse is built with a decoupled clean architecture designed for maximum throughput, resilience, and strict data privacy.
 
 ```mermaid
-graph TD
-    Client[Web SPA / Desktop / CLI / cURL / Scripts] -->|HTTP Multipart & Streaming| API[ASP.NET Core 9 Minimal API]
-    API --> Core[PdfEngine.Core]
-    
-    subgraph "PdfEngine.Core Engines"
-        Core --> PDFium["Google PDFium (Native C++ x64 via Docnet)"]
-        Core --> PdfSharp["PdfSharpCore (Vector Engine, Merge, Split, Watermark)"]
-        Core --> Crypto["BouncyCastle (Cryptography, AES-256, PKCS#7/PAdES)"]
-        Core --> OCR["Tesseract 5 Native (Multilingual OCR)"]
-        Core --> PdfPig["UglyToad PdfPig (AcroForms, Text Coordinates, Repair)"]
+flowchart TD
+    subgraph Ingestion ["1. INGESTION LAYER"]
+        WebUI["Web SPA Dashboard (Vanilla HTML5/JS)"]
+        External["CLI / cURL / External API Clients"]
+        HotDir["Hot Folders Watchdog (input/)"]
     end
+
+    subgraph API ["2. ASP.NET CORE 9 MINIMAL API"]
+        StreamRouter["In-Memory Stream Router & Multi-part Reader"]
+        Swagger["OpenAPI / Swagger Engine"]
+    end
+
+    subgraph Core ["3. PDFENGINE.CORE (Tri-Engine Pipeline)"]
+        subgraph PDFium ["Engine A: Google PDFium (Native C++)"]
+            Raster["300 DPI High-Res Rasterizer"]
+            CoordExtract["Glyph & Coordinate Matrix Engine"]
+        end
+        subgraph Vector ["Engine B: Vector & Cryptography"]
+            PdfSharp["PdfSharpCore (Merge, Split, Watermark, Booklet)"]
+            BouncyCastle["BouncyCastle (PKCS#7, PAdES, AES-256)"]
+        end
+        subgraph Analysis ["Engine C: Intelligence & Extraction"]
+            PdfPig["PdfPig (AcroForms, Text Flow, Table Geometry)"]
+            Tesseract["Tesseract 5 Native (Multilingual Local OCR)"]
+        end
+    end
+
+    subgraph Egress ["4. ZERO-DISK EGRESS"]
+        ResponseStream["HTTP Response Streaming (Zero Temp Disk Files)"]
+        ProcessedHot["Auto-Move to processed/ or failed/"]
+    end
+
+    WebUI --> StreamRouter
+    External --> StreamRouter
+    HotDir --> StreamRouter
+    StreamRouter --> Core
+    Core --> ResponseStream
+    Core --> ProcessedHot
 ```
 
-### 1. `PdfEngine.Core`
-Isolated domain layer containing clean interfaces (`IPdfMergeService`, `IPdfSigningService`, `IPdfOcrService`, etc.) and zero UI dependencies. Fully testable in isolation.
+### 1. The Tri-Engine Synergy
+Rather than relying on a single monolithic library that compromises on performance or capability, PDF Powerhouse orchestrates three specialized engines:
+* **Google PDFium C++ (via Docnet.Core)**: The identical, battle-tested native rendering core powering Google Chrome. Used for hardware-accelerated 300 DPI rasterization, thumbnail generation, and pixel-perfect previews.
+* **PdfSharpCore & BouncyCastle**: Lightweight in-memory document synthesis. Performs page tree concatenation, rotation, vector watermarking, and cryptographically sound PKCS#7 / PAdES signing with X.509 certificates.
+* **UglyToad PdfPig & Tesseract 5**: Deep structural inspection engine that traverses the PDF object model to read AcroForms, compute word bounding boxes for table reconstruction, and pipe pre-processed bitmaps into native Tesseract OCR.
 
-### 2. `PdfEngine.Api`
-High-throughput ASP.NET Core 9 Minimal API with:
-- Interactive Swagger / OpenAPI UI at `/swagger`
-- Embedded reactive Web Dashboard at `/` (`wwwroot/index.html`)
-- In-memory stream processing with zero temporary disk writes
+### 2. In-Memory Zero-Disk Security Model
+Most PDF utilities write unencrypted intermediate `.tmp` files to disk during operations like OCR or format conversion. PDF Powerhouse enforces an **in-memory streaming contract**:
+* Incoming files are ingested as non-buffered memory streams.
+* Transformations occur directly in RAM buffers.
+* Output is streamed directly to the HTTP response pipeline.
+* **Result**: Zero data leakage, zero disk clutter, and instantaneous compliance with GDPR, HIPAA, and sensitive internal data policies.
 
-### 3. `PdfEngine.Tests`
-Automated test suite using xUnit. 34/34 tests passing with dynamic in-memory PDF generation.
+### 3. Headless Hot Folders Engine
+For offices, law firms, and homelab automation:
+* A background `IHostedService` continuously monitors the `hotfolders/input/` directory using file system notifications.
+* **Debounce & Lock Protection**: Employs an exponential-retry mechanism to ensure files copied from network scanners or slow transfers are fully written before processing begins.
+* Automatically processes jobs according to preset rules (e.g., auto-convert to PDF/A and OCR) and cleanly routes results to `hotfolders/processed/` or `hotfolders/failed/` with forensic audit logs.
 
 ---
 
@@ -135,32 +226,27 @@ curl -X POST "http://localhost:5000/api/pdf/ocr" \
 
 ---
 
-## 🚀 Quickstart
+## ✨ Complete Feature Matrix
 
-### Option A: Download Standalone Executable (Windows)
-1. Go to [Releases](https://github.com/jdelavega23/pdf-powerhouse/releases/latest).
-2. Download `PDF_Powerhouse_v1.0.0_win-x64.zip`.
-3. Extract and double-click `Iniciar_PDF_Powerhouse.bat`. Your browser opens instantly at `http://localhost:5000`.
-
-### Option B: Build from Source (.NET 9)
-```bash
-git clone https://github.com/jdelavega23/pdf-powerhouse.git
-cd pdf-powerhouse
-dotnet test tests/PdfEngine.Tests/PdfEngine.Tests.csproj
-dotnet run --project src/PdfEngine.Api/PdfEngine.Api.csproj
-```
-
----
-
-## 🐳 Docker & Containers
-
-Deploy anywhere with a single command:
-
-```bash
-docker-compose up -d --build
-```
-
-Access the service immediately on port `5000` (Web UI at `/` and Swagger at `/swagger`).
+- **Blazing Native Rendering**: Official **Google PDFium C++** (x64) bindings render pages to PNG in milliseconds with ultra-crisp resolution.
+- **Document Manipulation**:
+  - `Merge`: Ultra-fast PDF concatenation preserving vector graphics, bookmarks, and fonts.
+  - `Split`: Automatic splitting into single pages or ranges, with instant `.ZIP` packaging.
+  - `Extract`: Surgical page extraction by custom ranges (e.g. `1-3, 5, 8-10`).
+  - `Rotate`: 90°, 180°, 270° orientation correction (per page or whole document).
+  - `Watermark`: Vector watermark overlay with customizable font, angle, opacity, and color.
+- **Security & Integrity**:
+  - `Protect`: Multi-level password encryption (User / Owner) with granular permission flags (printing, copying, annotations).
+  - `Unlock`: Permission stripping and decryption.
+  - `Sign`: PKCS#7 / PAdES digital signatures with X.509 certificates (`.pfx` / `.p12`), visual cryptographic stamps, and self-signed certificate generator.
+- **Advanced Engineering**:
+  - `PDF/A Validator & Converter`: Official ISO 19005-1 / ISO 19005-2 compliance for judicial and public administration submissions.
+  - `Local OCR`: Native Tesseract 5 engine (300 DPI pre-render + multilingual recognition with automatic model downloads).
+  - `Doctor PDF`: Structural diagnosis and automated repair of corrupted streams.
+  - `Office Converter`: Universal conversion of Office documents (`.docx`, `.xlsx`, `.pptx`, `.csv`, `.txt`, `.rtf`) to vector PDF.
+  - `Table Extractor`: Intelligent table boundary detection with export to structured CSV / Excel.
+  - `Hot Folders`: Background watchdog service for unattended directory processing (`input/` ➔ `processed/` or `failed/`).
+  - `Batch Studio`: Concurrent multi-threaded processing with ZIP packaging and forensic audit reports.
 
 ---
 
