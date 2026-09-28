@@ -2,6 +2,8 @@ using System.Diagnostics;
 using System.Text;
 using PdfEngine.Core.Contracts;
 using PdfEngine.Core.Models;
+using PdfSharpCore.Drawing;
+using PdfSharpCore.Pdf;
 using Tesseract;
 
 namespace PdfEngine.Core.Services;
@@ -16,6 +18,21 @@ public class PdfOcrService : IPdfOcrService
     public PdfOcrService(IPdfInspectionService inspectionService)
     {
         _inspectionService = inspectionService;
+
+        // Ensure Tesseract native loader always has an explicit, valid base directory
+        try
+        {
+            if (string.IsNullOrWhiteSpace(TesseractEnviornment.CustomSearchPath))
+            {
+                var baseDir = AppContext.BaseDirectory;
+                if (!string.IsNullOrWhiteSpace(baseDir))
+                {
+                    TesseractEnviornment.CustomSearchPath = baseDir;
+                }
+            }
+        }
+        catch { }
+
         _tessDataDir = Path.Combine(AppContext.BaseDirectory, "tessdata");
         if (!Directory.Exists(_tessDataDir))
         {
@@ -29,6 +46,8 @@ public class PdfOcrService : IPdfOcrService
             "/usr/share/tesseract-ocr/5/tessdata",
             "/usr/share/tesseract-ocr/4.00/tessdata",
             "/usr/share/tessdata",
+            @"C:\Program Files\Tesseract-OCR\tessdata",
+            @"C:\Program Files (x86)\Tesseract-OCR\tessdata",
             Environment.GetEnvironmentVariable("TESSDATA_PREFIX")
         };
 
@@ -58,12 +77,53 @@ public class PdfOcrService : IPdfOcrService
         options ??= new OcrOptions();
 
         var sw = Stopwatch.StartNew();
-        var primaryLang = options.Language.Split('+')[0];
+        var primaryLang = options.Language?.Split('+')[0] ?? "spa";
+        if (string.IsNullOrWhiteSpace(primaryLang))
+        {
+            primaryLang = "spa";
+        }
 
         // Ensure language traineddata model is available locally
         await EnsureLanguageModelAsync(primaryLang, cancellationToken);
 
-        return await Task.Run(() =>
+        try
+        {
+            var res = await PerformRawEngineOcrAsync(imageBytes, primaryLang, cancellationToken);
+            sw.Stop();
+            return res with { ProcessingTimeMs = sw.ElapsedMilliseconds };
+        }
+        catch
+        {
+            // Intelligent High-Fidelity Fallback:
+            // If native Leptonica cannot decode this specific image stream directly (e.g. unsupported color space,
+            // 16-bit PNG, transparent RGBA or native interop issue), wrap image into an in-memory PDF via PdfSharpCore
+            // and render it through Google PDFium into a 100% compliant 24-bit bitmap.
+            try
+            {
+                using var pdfStream = new MemoryStream();
+                using (var doc = new PdfDocument())
+                {
+                    var page = doc.AddPage();
+                    using var xImg = XImage.FromStream(() => new MemoryStream(imageBytes));
+                    page.Width = xImg.PointWidth;
+                    page.Height = xImg.PointHeight;
+                    using var gfx = XGraphics.FromPdfPage(page);
+                    gfx.DrawImage(xImg, 0, 0);
+                    doc.Save(pdfStream, false);
+                }
+
+                return await PerformOcrOnScannedPdfAsync(pdfStream.ToArray(), options, cancellationToken);
+            }
+            catch
+            {
+                throw;
+            }
+        }
+    }
+
+    private Task<OcrResult> PerformRawEngineOcrAsync(byte[] imageBytes, string primaryLang, CancellationToken cancellationToken)
+    {
+        return Task.Run(() =>
         {
             cancellationToken.ThrowIfCancellationRequested();
 
@@ -75,14 +135,11 @@ public class PdfOcrService : IPdfOcrService
             var confidence = page.GetMeanConfidence();
             var words = text.Split(new[] { ' ', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries).Length;
 
-            sw.Stop();
-
             return new OcrResult
             {
                 Text = text,
                 MeanConfidence = confidence * 100, // percentage
-                WordCount = words,
-                ProcessingTimeMs = sw.ElapsedMilliseconds
+                WordCount = words
             };
         }, cancellationToken);
     }

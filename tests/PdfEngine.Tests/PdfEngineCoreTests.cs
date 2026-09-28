@@ -908,5 +908,31 @@ public class PdfEngineCoreTests
         Assert.Equal(2, result.FieldsCreated);
         Assert.Equal(2, result.FieldNames.Count);
     }
+
+    [Fact]
+    public async Task Ocr_PerformOcrOnImage_ShouldProcessImage()
+    {
+        var ocrService = new PdfOcrService(new PdfInspectionService());
+        var invoiceService = new PdfInvoiceService();
+        var issuer = new InvoiceParty { Name = "Test", Iban = "ES1234567890", Bic = "TEST" };
+        var qrPng = invoiceService.GenerateSepaPaymentQrPng(issuer, "FAC-001", 100m, "Test OCR");
+
+        var result = await ocrService.PerformOcrOnImageAsync(qrPng);
+        Assert.NotNull(result);
+        Assert.True(result.ProcessingTimeMs >= 0);
+        Assert.False(string.IsNullOrWhiteSpace(Tesseract.TesseractEnviornment.CustomSearchPath));
+    }
+
+    [Fact]
+    public async Task Ocr_PerformOcrOnImage_WithNullOrEmptyLanguage_ShouldFallbackGracefully()
+    {
+        var ocrService = new PdfOcrService(new PdfInspectionService());
+        var invoiceService = new PdfInvoiceService();
+        var issuer = new InvoiceParty { Name = "Test", Iban = "ES1234567890", Bic = "TEST" };
+        var qrPng = invoiceService.GenerateSepaPaymentQrPng(issuer, "FAC-002", 50m, "Test Fallback");
+
+        var result = await ocrService.PerformOcrOnImageAsync(qrPng, new OcrOptions { Language = "" });
+        Assert.NotNull(result);
+    }
 }
 

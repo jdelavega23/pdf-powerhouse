@@ -4,6 +4,16 @@ using PdfEngine.Core;
 var baseDir = AppContext.BaseDirectory;
 var candidateWwwroot = Path.Combine(baseDir, "wwwroot");
 
+// Ensure Tesseract native binaries (x64 / x86) are found reliably
+try
+{
+    if (string.IsNullOrWhiteSpace(Tesseract.TesseractEnviornment.CustomSearchPath))
+    {
+        Tesseract.TesseractEnviornment.CustomSearchPath = baseDir;
+    }
+}
+catch { }
+
 var webAppOptions = new WebApplicationOptions
 {
     Args = args,
